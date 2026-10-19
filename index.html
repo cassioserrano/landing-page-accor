@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Skills</title>
+<style>
+  :root {
+    --bg: #0f1115;
+    --panel: #171a21;
+    --panel-2: #1f232c;
+    --border: #2a2f3a;
+    --text: #e8e9ed;
+    --muted: #9aa0ac;
+    --accent: #d97757;
+    --accent-2: #7aa2f7;
+    --good: #6fcf97;
+    --warn: #f2c94c;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: radial-gradient(1200px 600px at 50% -10%, #1b1e27 0%, var(--bg) 60%);
+    color: var(--text);
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+    padding: 40px 20px 80px;
+  }
+  header {
+    max-width: 1100px;
+    margin: 0 auto 40px;
+    text-align: center;
+  }
+  header h1 {
+    font-size: 2.4rem;
+    margin: 0 0 8px;
+    letter-spacing: -0.5px;
+  }
+  header h1 span {
+    color: var(--accent);
+  }
+  header p {
+    color: var(--muted);
+    max-width: 620px;
+    margin: 0 auto;
+    line-height: 1.5;
+  }
+  .search-bar {
+    max-width: 500px;
+    margin: 24px auto 0;
+    display: flex;
+    gap: 8px;
+  }
+  .search-bar input {
+    flex: 1;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    color: var(--text);
+    font-size: 0.95rem;
+  }
+  .search-bar input:focus { outline: 2px solid var(--accent); }
+  .filters {
+    max-width: 1100px;
+    margin: 28px auto 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+  }
+  .chip {
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    color: var(--muted);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    user-select: none;
+  }
+  .chip:hover { border-color: var(--accent); color: var(--text); }
+  .chip.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #1a1a1a;
+    font-weight: 600;
+  }
+  .grid {
+    max-width: 1100px;
+    margin: 36px auto 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+    gap: 18px;
+  }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: transform 0.15s ease, border-color 0.15s ease;
+  }
+  .card:hover {
+    transform: translateY(-3px);
+    border-color: var(--accent);
+  }
+  .card-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+  }
+  .card h3 {
+    margin: 0;
+    font-size: 1.05rem;
+  }
+  .card .slug {
+    font-size: 0.75rem;
+    color: var(--muted);
+    font-family: Consolas, monospace;
+  }
+  .card p.desc {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.88rem;
+    line-height: 1.5;
+    flex: 1;
+  }
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .tag {
+    font-size: 0.72rem;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: var(--panel-2);
+    color: var(--accent-2);
+    border: 1px solid var(--border);
+  }
+  .meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.75rem;
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+    padding-top: 10px;
+    margin-top: 4px;
+  }
+  .status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--good);
+  }
+  .dot.beta { background: var(--warn); }
+  footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.8rem;
+    margin-top: 60px;
+  }
+  .hidden { display: none !important; }
+  .empty-state {
+    text-align: center;
+    color: var(--muted);
+    padding: 60px 0;
+    grid-column: 1 / -1;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Claude <span>Skills</span></h1>
+  <p>Um catálogo (fictício) de skills que estendem as capacidades do Claude — de automação de documentos a análise de dados e criatividade visual.</p>
+  <div class="search-bar">
+    <input type="text" id="searchInput" placeholder="Buscar uma skill... (ex: planilha, imagem, código)">
+  </div>
+</header>
+
+<div class="filters" id="filters"></div>
+
+<div class="grid" id="grid"></div>
+
+<footer>Catálogo ilustrativo gerado para fins de demonstração — nomes e descrições são fictícios.</footer>
+
+<script>
+const skills = [
+  { name: "Docs Weaver", slug: "docs-weaver", icon: "📄", color: "#d97757",
+    desc: "Cria e edita documentos Word complexos com formatação avançada, sumários automáticos e controle de versões de rascunho.",
+    tags: ["documentos", "escrita"], status: "stable" },
+  { name: "SheetMind", slug: "sheetmind", icon: "📊", color: "#6fcf97",
+    desc: "Monta planilhas Excel com fórmulas dinâmicas, tabelas dinâmicas e gráficos prontos para apresentação executiva.",
+    tags: ["planilhas", "dados"], status: "stable" },
+  { name: "SlideForge", slug: "slideforge", icon: "🖼️", color: "#7aa2f7",
+    desc: "Gera apresentações PowerPoint com narrativa visual coesa, paletas de cor consistentes e layouts responsivos.",
+    tags: ["apresentações", "design"], status: "stable" },
+  { name: "PDF Sage", slug: "pdf-sage", icon: "📚", color: "#f2c94c",
+    desc: "Lê, resume e extrai dados estruturados de PDFs longos, incluindo tabelas e formulários escaneados.",
+    tags: ["documentos", "extração"], status: "stable" },
+  { name: "CodeCompanion", slug: "codecompanion", icon: "💻", color: "#9b59b6",
+    desc: "Revisa pull requests, sugere refatorações e identifica bugs de concorrência antes do merge.",
+    tags: ["código", "revisão"], status: "stable" },
+  { name: "DataViz Atelier", slug: "dataviz-atelier", icon: "📈", color: "#e74c3c",
+    desc: "Projeta dashboards e gráficos com paleta acessível, tipografia consistente e storytelling orientado a dados.",
+    tags: ["dados", "design"], status: "stable" },
+  { name: "MemoryKeeper", slug: "memorykeeper", icon: "🧠", color: "#1abc9c",
+    desc: "Organiza e consolida memórias de longo prazo entre sessões, removendo duplicatas e fatos desatualizados.",
+    tags: ["produtividade", "memória"], status: "beta" },
+  { name: "Scheduler Pro", slug: "scheduler-pro", icon: "⏰", color: "#f39c12",
+    desc: "Agenda tarefas recorrentes, lembretes e rotinas automatizadas com expressões cron em linguagem natural.",
+    tags: ["automação", "tempo"], status: "stable" },
+  { name: "FrontendCraft", slug: "frontendcraft", icon: "🎨", color: "#e67e22",
+    desc: "Constrói interfaces web responsivas com componentes reutilizáveis e acessibilidade validada por padrão.",
+    tags: ["design", "código"], status: "stable" },
+  { name: "SecurityScope", slug: "securityscope", icon: "🔒", color: "#c0392b",
+    desc: "Audita mudanças de código em busca de vulnerabilidades OWASP antes de liberar para produção.",
+    tags: ["segurança", "revisão"], status: "beta" },
+  { name: "TranslateFlow", slug: "translateflow", icon: "🌐", color: "#2980b9",
+    desc: "Traduz documentos técnicos preservando terminologia, tom e formatação original entre múltiplos idiomas.",
+    tags: ["idiomas", "documentos"], status: "stable" },
+  { name: "MeetingDistiller", slug: "meetingdistiller", icon: "🗒️", color: "#8e44ad",
+    desc: "Transforma transcrições de reuniões em atas estruturadas com decisões, donos e prazos destacados.",
+    tags: ["produtividade", "escrita"], status: "beta" },
+  { name: "APIBridge", slug: "apibridge", icon: "🔌", color: "#16a085",
+    desc: "Conecta Claude a APIs externas via MCP, gerando clientes tipados e tratando autenticação automaticamente.",
+    tags: ["integração", "código"], status: "stable" },
+  { name: "QuizForge", slug: "quizforge", icon: "🎓", color: "#27ae60",
+    desc: "Cria questionários e materiais de estudo adaptados ao nível de conhecimento do usuário.",
+    tags: ["educação", "escrita"], status: "experimental" },
+  { name: "ChartSentinel", slug: "chartsentinel", icon: "🛰️", color: "#2c3e50",
+    desc: "Monitora métricas de negócio e gera alertas narrativos quando padrões anômalos são detectados.",
+    tags: ["dados", "automação"], status: "experimental" },
+];
+
+const grid = document.getElementById("grid");
+const filtersEl = document.getElementById("filters");
+const searchInput = document.getElementById("searchInput");
+
+const allTags = ["todas", ...new Set(skills.flatMap(s => s.tags))];
+let activeTag = "todas";
+
+function renderFilters() {
+  filtersEl.innerHTML = allTags.map(tag =>
+    `<div class="chip ${tag === activeTag ? 'active' : ''}" data-tag="${tag}">${tag}</div>`
+  ).join("");
+  filtersEl.querySelectorAll(".chip").forEach(chip => {
+    chip.addEventListener("click", () => {
+      activeTag = chip.dataset.tag;
+      renderFilters();
+      renderGrid();
+    });
+  });
+}
+
+function statusLabel(status) {
+  if (status === "stable") return { text: "Estável", cls: "" };
+  if (status === "beta") return { text: "Beta", cls: "beta" };
+  return { text: "Experimental", cls: "beta" };
+}
+
+function renderGrid() {
+  const query = searchInput.value.trim().toLowerCase();
+  const filtered = skills.filter(s => {
+    const matchesTag = activeTag === "todas" || s.tags.includes(activeTag);
+    const matchesQuery = !query ||
+      s.name.toLowerCase().includes(query) ||
+      s.desc.toLowerCase().includes(query) ||
+      s.tags.some(t => t.includes(query));
+    return matchesTag && matchesQuery;
+  });
+
+  if (filtered.length === 0) {
+    grid.innerHTML = `<div class="empty-state">Nenhuma skill encontrada.</div>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map(s => {
+    const st = statusLabel(s.status);
+    return `
+    <div class="card">
+      <div class="card-top">
+        <div class="icon" style="background:${s.color}22; color:${s.color};">${s.icon}</div>
+        <div>
+          <h3>${s.name}</h3>
+          <div class="slug">${s.slug}</div>
+        </div>
+      </div>
+      <p class="desc">${s.desc}</p>
+      <div class="tags">
+        ${s.tags.map(t => `<span class="tag">${t}</span>`).join("")}
+      </div>
+      <div class="meta">
+        <span class="status"><span class="dot ${st.cls}"></span>${st.text}</span>
+        <span>v1.${Math.floor(Math.random()*9)}</span>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+searchInput.addEventListener("input", renderGrid);
+
+renderFilters();
+renderGrid();
+</script>
+</body>
+</html>
